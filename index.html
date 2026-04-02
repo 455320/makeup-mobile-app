@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/x-icon" href="Screenshot_2026-03-26_224323-artguru-removebg-preview.png">
+    <title>Natural Beauty - Premium Makeup Store</title>
+    <link rel="stylesheet" href="makeup-styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div id="loading" class="loading-screen">
+        <div class="loading-spinner"></div>
+        <p>Loading Beauty...</p>
+    </div>
+
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <img src="Screenshot_2026-03-26_224323-artguru-removebg-preview.png" alt="Natural Beauty Logo" class="logo-icon" width="100" height="95">
+            <h1 class="logo" style="margin-left:-770px;">Natural Beauty</h1>
+            <div class="header-actions">
+                <button class="cart-btn" id="cartBtn" data-testid="cart-button">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="9" cy="21" r="1"></circle>
+                        <circle cx="20" cy="21" r="1"></circle>
+                        <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+                    </svg>
+                    <span class="cart-count" id="cartCount">0</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="container">
+            <div class="hero-content">
+                <h2 class="hero-title">Discover Your Beauty</h2>
+                <p class="hero-subtitle">Premium makeup products for the modern woman</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Category Filter -->
+    <section class="category-section">
+        <div class="container">
+            <div class="category-filter" id="categoryFilter" data-testid="category-filter">
+                <button class="category-btn active" data-category="all">All Products</button>
+                <button class="category-btn" data-category="Foundation">Foundation</button>
+                <button class="category-btn" data-category="Lipstick">Lipstick</button>
+                <button class="category-btn" data-category="Eyeshadow">Eyeshadow</button>
+                <button class="category-btn" data-category="Blush">Blush</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Products Section -->
+    <section class="products-section">
+        <div class="container">
+            <div class="products-grid" id="productsGrid" data-testid="products-grid">
+                <!-- Products will be loaded here -->
+                 <div class="product-card id-1"></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Shopping Cart Sidebar -->
+    <div class="cart-sidebar" id="cartSidebar" data-testid="cart-sidebar">
+        <div class="cart-header">
+            <h3>Shopping Cart</h3>
+            <button class="close-cart" id="closeCart">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </button>
+        </div>
+        <div class="cart-items" id="cartItems" data-testid="cart-items">
+            <!-- Cart items will be loaded here -->
+        </div>
+        <div class="cart-footer">
+            <div class="cart-total">
+                <span>Total:</span>
+                <span class="total-amount" id="totalAmount" data-testid="total-amount">₹0</span>
+            </div>
+            <button class="checkout-btn" id="checkoutBtn" data-testid="checkout-button">Proceed to Checkout</button>
+        </div>
+    </div>
+
+    <!-- Cart Overlay -->
+    <div class="cart-overlay" id="cartOverlay"></div>
+    <div>Total: <span id="cart-total">₹0</span></div>
+
+    <!-- Checkout Modal -->
+    <div class="modal" id="checkoutModal" data-testid="checkout-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Checkout</h3>
+                <button class="close-modal" id="closeCheckout">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="checkoutForm" data-testid="checkout-form">
+                    <div class="form-group">
+                        <label for="customerName">Full Name *</label>
+                        <input type="text" id="customerName" name="customerName" required data-testid="customer-name-input">
+                    </div>
+                    <div class="form-group">
+                        <label for="customerEmail">Email *</label>
+                        <input type="email" id="customerEmail" name="customerEmail" required data-testid="customer-email-input">
+                    </div>
+                    <div class="form-group">
+                        <label for="customerPhone">Phone Number *</label>
+                        <input type="tel" id="customerPhone" name="customerPhone" required data-testid="customer-phone-input">
+                    </div>
+                    <div class="form-group">
+                        <label for="customerAddress">Delivery Address *</label>
+                        <textarea id="customerAddress" name="customerAddress" rows="3" required data-testid="customer-address-input"></textarea>
+                    </div>
+                    <div class="order-summary">
+                        <h4>Order Summary</h4>
+                        <div id="checkoutItems" data-testid="checkout-items"></div>
+                        <div class="checkout-total">
+                            <div>Total Amount: <span id="checkout-total">₹0</span></div>
+                        </div>
+                    </div>
+                    <button type="submit" class="submit-btn" data-testid="place-order-button">Place Order</button>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+
+    <!-- Success Modal -->
+    <div class="modal" id="successModal" data-testid="success-modal">
+        <div class="modal-content success-content">
+            <div class="success-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                    <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                </svg>
+            </div>
+            <h3>Order Placed Successfully!</h3>
+            <p>Thank you for your purchase. We'll send you a confirmation email shortly.</p>
+            <p class="order-id">Order ID: <span id="orderId" data-testid="order-id"></span></p>
+            <button class="submit-btn" id="closeSuccess" data-testid="close-success-button">Continue Shopping</button>
+        </div>
+    </div>
+
+    <!-- Modal Overlay -->
+    <div class="modal-overlay" id="modalOverlay"></div>
+<script src="index.js" defer></script>
+<link rel="stylesheet" href="styles.css">
+</body>
+</html>
