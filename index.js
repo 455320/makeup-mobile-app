@@ -232,7 +232,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
         saveCart();
         renderCart();
-        openCart();
+        // Cart no longer opens automatically; user can open via cart button.
     };
 
     // Increment quantity
