@@ -3,18 +3,23 @@ const API_BASE_URL = window.location.origin + '/api';
 
 // ==================== STATE MANAGEMENT ====================
 let products = [];
-let cart = JSON.parse(localStorage.getItem('cart')) || [];
+let cart = [];
 let selectedCategory = 'all';
-let cart2 = [];
+
+// Load cart from localStorage, normalizing to { productId, quantity } format
+try {
+    const saved = JSON.parse(localStorage.getItem('cart'));
+    if (Array.isArray(saved)) {
+        cart = saved.filter(item => item && item.productId && item.quantity);
+    }
+} catch (e) {
+    cart = [];
+}
 
 // ==================== START AFTER DOM LOAD ====================
 document.addEventListener("DOMContentLoaded", () => {
 
-    
-    
     // ==================== DOM ELEMENTS ====================
-  
-  
     const elements = {
         loading: document.getElementById('loading'),
         productsGrid: document.getElementById('productsGrid'),
@@ -32,7 +37,6 @@ document.addEventListener("DOMContentLoaded", () => {
         closeCheckout: document.getElementById('closeCheckout'),
         checkoutForm: document.getElementById('checkoutForm'),
         checkoutItems: document.getElementById('checkoutItems'),
-        checkoutTotal: document.getElementById('checkoutTotal'),
         successModal: document.getElementById('successModal'),
         closeSuccess: document.getElementById('closeSuccess'),
         orderId: document.getElementById('orderId')
@@ -50,7 +54,6 @@ document.addEventListener("DOMContentLoaded", () => {
                 reviews_count: 120,
                 description: "Smooth matte finish foundation",
                 image_url: "51aXLC28FgL_Zawa.jpg"
-            
             },
             {
                 id: "2",
@@ -61,7 +64,6 @@ document.addEventListener("DOMContentLoaded", () => {
                 reviews_count: 200,
                 description: "Long lasting matte lipstick",
                 image_url: "618CcxfdKfL_imgupscaler.ai_V1(Fast)_2K.png"
-        
             },
             {
                 id: "3",
@@ -103,7 +105,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 description: "24-hour long wear liquid eyeliner with flexi-tip brush for sharp lines",
                 image_url: "24894_H-8901030979552_Zawa.jpg"
             },
-             {
+            {
                 id: "7",
                 name: "24 HRS Glam Mascara",
                 category: "Eyeshadow",
@@ -113,7 +115,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 description: "Extreme length, long-lasting hold, waterproof formula",
                 image_url: "mascara_24hr_glam_fexi_queen_EN_brush.webp"
             },
-             {
+            {
                 id: "8",
                 name: "ETUDE House Glass Rouge Tint-K-Beauty SKin",
                 category: "Lipstick",
@@ -123,7 +125,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 description: " A glossy lip tint giving your lips a luscious and radiant look.",
                 image_url: "31B0oF2GFPL_Zawa.jpg"
             },
-             {
+            {
                 id: "9",
                 name: "INSIGHT HIGHLIGHTER",
                 category: "Blush",
@@ -133,7 +135,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 description: "H-01 06 COSMIC POWER",
                 image_url: "61rqN3-HH_L,_SL1200-Picsart-AiImageEnhancer.webp"
             },
-             {
+            {
                 id: "10",
                 name: "Maybelline Fit Me Matte + Poreless Compact",
                 category: "Foundation",
@@ -143,7 +145,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 description: "Oil-control compact powder for smooth matte skin and pore blur effect",
                 image_url: "Maybelline-Compact-Powder-1024x512.-pxbee-minitools-enhance-2026032714912.jpg"
             },
-             {
+            {
                 id: "11",
                 name: " One Step Color Corrector Face Primer",
                 category: "Foundation",
@@ -163,7 +165,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 description: "Erase dark circles & fine lines, Long Lasting Concealer",
                 image_url: "41JH2Raft3L._SX522_.jpg"
             },
-               {
+            {
                 id: "13",
                 name: "Glam21 4-in-1 Eyebrow Palette",
                 category: "Eyeshadow",
@@ -173,7 +175,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 description: "Micro Pigments for Precise Brows | Smudge-Proof & Long Lasting | All-in-One Eye Makeup Kit",
                 image_url: "51HkrrB1WZL._SL1500_.jpg"
             },
-             {
+            {
                 id: "14",
                 name: "Recode RE08 Featherlight Faux Mink Eyelashes",
                 category: "Eyeshadow",
@@ -202,7 +204,7 @@ document.addEventListener("DOMContentLoaded", () => {
             ? products
             : products.filter(p => p.category === filterCategory);
 
-       elements.productsGrid.innerHTML = filteredProducts.map((product, index) => `
+        elements.productsGrid.innerHTML = filteredProducts.map((product, index) => `
     <div class="product-card id-${index + 1}">
         <img src="${product.image_url}" class="product-image">
         <div class="product-info">
@@ -219,13 +221,8 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     // ==================== CART ====================//
-    function addToCart(productId) {
-    const product = products.find(p => p.id == productId);
 
-    cart.push(product);
-
-    updateCartTotal(); // 🔥 update total
-}
+    // Single global addToCart function
     window.addToCart = function(productId) {
         const existingItem = cart.find(item => item.productId === productId);
         if (existingItem) {
@@ -235,6 +232,30 @@ document.addEventListener("DOMContentLoaded", () => {
         }
         saveCart();
         renderCart();
+        openCart();
+    };
+
+    // Increment quantity
+    window.incrementItem = function(productId) {
+        const item = cart.find(item => item.productId === productId);
+        if (item) {
+            item.quantity += 1;
+            saveCart();
+            renderCart();
+        }
+    };
+
+    // Decrement quantity
+    window.decrementItem = function(productId) {
+        const item = cart.find(item => item.productId === productId);
+        if (item) {
+            item.quantity -= 1;
+            if (item.quantity <= 0) {
+                cart = cart.filter(i => i.productId !== productId);
+            }
+            saveCart();
+            renderCart();
+        }
     };
 
     window.removeFromCart = function(productId) {
@@ -247,45 +268,99 @@ document.addEventListener("DOMContentLoaded", () => {
         localStorage.setItem('cart', JSON.stringify(cart));
     }
 
+    // ==================== CALCULATE TOTAL ====================
+    function calculateTotal() {
+        return cart.reduce((sum, item) => {
+            const product = products.find(p => p.id === item.productId);
+            if (!product) return sum;
+            return sum + product.price * item.quantity;
+        }, 0);
+    }
+
+    // ==================== UPDATE ALL PRICES EVERYWHERE ====================
+    function updateAllPrices() {
+        const total = calculateTotal();
+        const totalCount = cart.reduce((sum, item) => sum + item.quantity, 0);
+
+        // 1. Cart badge count
+        elements.cartCount.textContent = totalCount;
+
+        // 2. Cart sidebar total
+        elements.totalAmount.textContent = `₹${total}`;
+
+        // 3. Cart-total span (below overlay)
+        const cartTotalEl = document.getElementById("cart-total");
+        if (cartTotalEl) {
+            cartTotalEl.innerText = "₹" + total;
+        }
+
+        // 4. Checkout total
+        const checkoutTotalEl = document.getElementById("checkout-total");
+        if (checkoutTotalEl) {
+            checkoutTotalEl.innerText = "₹" + total;
+        }
+
+        // 5. Save to localStorage for any external use
+        localStorage.setItem("cartTotal", total);
+    }
+
+    // ==================== RENDER CART ====================
     function renderCart() {
         if (cart.length === 0) {
-            elements.cartItems.innerHTML = "<p>Your cart is empty</p>";
+            elements.cartItems.innerHTML = `<p style="text-align:center; color:#999; padding:40px 0;">Your cart is empty</p>`;
         } else {
             elements.cartItems.innerHTML = cart.map(item => {
                 const product = products.find(p => p.id === item.productId);
+                if (!product) return '';
+                const itemTotal = product.price * item.quantity;
                 return `
-                    <div>
-                        ${product.name} x ${item.quantity}
-                        <button onclick="removeFromCart('${product.id}')">X</button>
+                    <div class="cart-item" style="display:flex; align-items:center; gap:12px; padding:12px 0; border-bottom:1px solid #eee;">
+                        <img src="${product.image_url}" alt="${product.name}" style="width:55px; height:55px; object-fit:cover; border-radius:8px;">
+                        <div style="flex:1;">
+                            <div style="font-weight:600; font-size:14px;">${product.name}</div>
+                            <div style="color:#888; font-size:12px;">₹${product.price} each</div>
+                            <div style="display:flex; align-items:center; gap:8px; margin-top:6px;">
+                                <button onclick="decrementItem('${product.id}')" style="width:28px; height:28px; border:1px solid #ddd; background:#f5f5f5; border-radius:6px; cursor:pointer; font-size:16px; display:flex; align-items:center; justify-content:center;">−</button>
+                                <span style="font-weight:600; min-width:20px; text-align:center;">${item.quantity}</span>
+                                <button onclick="incrementItem('${product.id}')" style="width:28px; height:28px; border:1px solid #ddd; background:#f5f5f5; border-radius:6px; cursor:pointer; font-size:16px; display:flex; align-items:center; justify-content:center;">+</button>
+                            </div>
+                        </div>
+                        <div style="text-align:right;">
+                            <div style="font-weight:700; color:#c2185b;">₹${itemTotal}</div>
+                            <button onclick="removeFromCart('${product.id}')" style="background:none; border:none; color:#e53935; cursor:pointer; font-size:12px; margin-top:4px;">✕ Remove</button>
+                        </div>
                     </div>
                 `;
             }).join('');
         }
-        updateCartCount();
-        updateTotal();
+
+        // Update ALL price displays everywhere
+        updateAllPrices();
+
+        // Also update checkout items if checkout modal is open
+        renderCheckoutItems();
     }
 
-    function updateCartCount() {
-        const count = cart.reduce((sum, item) => sum + item.quantity, 0);
-        elements.cartCount.textContent = count;
-        let total = 0;
+    // ==================== RENDER CHECKOUT ITEMS ====================
+    function renderCheckoutItems() {
+        if (!elements.checkoutItems) return;
 
-    cart.forEach(item => {
-        const product = products.find(p => p.id === item.productId);
-        total += product.price * item.quantity;
-    });
-    // Show in cart page
-    document.getElementById("cart-total").innerText = "₹" + total;
-    // 🔥 SAVE total (important for checkout)
-    localStorage.setItem("cartTotal", total);
-    }
+        if (cart.length === 0) {
+            elements.checkoutItems.innerHTML = '<p>No items</p>';
+            return;
+        }
 
-    function updateTotal() {
-        const total = cart.reduce((sum, item) => {
+        elements.checkoutItems.innerHTML = cart.map(item => {
             const product = products.find(p => p.id === item.productId);
-            return sum + product.price * item.quantity;
-        }, 0);
-        elements.totalAmount.textContent = `₹${total}`;
+            if (!product) return '';
+            const itemTotal = product.price * item.quantity;
+            return `
+                <div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid #f0f0f0;">
+                    <span>${product.name} × ${item.quantity}</span>
+                    <span style="font-weight:600;">₹${itemTotal}</span>
+                </div>
+            `;
+        }).join('');
     }
 
     // ==================== UI ====================
@@ -301,6 +376,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function openCheckout() {
         if (cart.length === 0) return;
+        // Refresh checkout items and total before showing
+        renderCheckoutItems();
+        updateAllPrices();
         elements.checkoutModal.classList.add('active');
         elements.modalOverlay.classList.add('active');
     }
@@ -339,12 +417,7 @@ document.addEventListener("DOMContentLoaded", () => {
             renderProducts(e.target.dataset.category);
         }
     });
-//====================== LOAD CART TOTAL ON CHECKOUT PAGE =====================//
-window.onload = function () {
-    const total = localStorage.getItem("cartTotal") || 0;
 
-    document.getElementById("checkout-total").innerText = "₹" + total;
-};
     elements.checkoutForm.addEventListener('submit', (e) => {
         e.preventDefault();
         cart = [];
@@ -364,4 +437,3 @@ window.onload = function () {
 
     init();
 });
-
